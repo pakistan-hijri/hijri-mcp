@@ -1,0 +1,17 @@
+{
+  "hijri_year": 1447,
+  "coverage_start": "2025-06-27",
+  "generated_at": "2026-11-21T09:22:41.389Z",
+  "baseline": "islamic-umalqura (Intl)",
+  "days": {
+    "2025-06-27": {
+      "hijri": "1447-01-01",
+      "year": 1447,
+      "month": 1,
+      "day": 1,
+      "month_name": { "en": "Muharram", "ur": "محرم" },
+      "confidence": "confirmed",
+      "sources": ["https://example.test/muharram-1447"]
+    }
+  }
+}

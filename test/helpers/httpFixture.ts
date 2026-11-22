@@ -35,9 +35,13 @@ export async function createFixtureServer(): Promise<FixtureServer> {
 function payloadFor(path: string): unknown {
   if (path === "/cities.json") return fixture("cities.json");
   if (path === "/hijri/index.json") return fixture("index.json");
+  if (path === "/hijri/calendar/1447.json") return fixture("calendar-1447.json");
   if (path === "/hijri/calendar/1448.json") return fixture("calendar-1448.json");
   if (path === "/prayer/karachi/sunni_hanafi/2026.json") {
     return fixture("prayer-karachi-2026.json");
+  }
+  if (path === "/prayer/karachi/sunni_hanafi/2027.json") {
+    return fixture("prayer-karachi-2027.json");
   }
   const calendar = /^\/hijri\/calendar\/(\d+)\.json$/.exec(path);
   if (calendar?.[1]) {

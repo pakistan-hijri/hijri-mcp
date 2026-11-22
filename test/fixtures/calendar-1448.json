@@ -40,11 +40,37 @@
       "confidence": "predicted",
       "uncertainty_days": 2
     },
+    "2026-12-10": {
+      "hijri": "1448-05-29",
+      "year": 1448,
+      "month": 5,
+      "day": 29,
+      "month_name": { "en": "Jumada al-Awwal", "ur": "جمادی الاول" },
+      "confidence": "confirmed"
+    },
     "2026-12-20": {
       "hijri": "1448-09-01",
       "year": 1448,
       "month": 9,
       "day": 1,
+      "month_name": { "en": "Ramadan", "ur": "رمضان" },
+      "confidence": "predicted",
+      "uncertainty_days": 2
+    },
+    "2026-12-31": {
+      "hijri": "1448-09-12",
+      "year": 1448,
+      "month": 9,
+      "day": 12,
+      "month_name": { "en": "Ramadan", "ur": "رمضان" },
+      "confidence": "predicted",
+      "uncertainty_days": 2
+    },
+    "2027-01-01": {
+      "hijri": "1448-09-13",
+      "year": 1448,
+      "month": 9,
+      "day": 13,
       "month_name": { "en": "Ramadan", "ur": "رمضان" },
       "confidence": "predicted",
       "uncertainty_days": 2
