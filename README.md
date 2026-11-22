@@ -1,29 +1,30 @@
 # hijri-mcp
 
-A local read-only MCP server for Pakistan Hijri dates and calculated prayer
-times, backed by `hijri-api`.
+A local, read-only [Model Context Protocol](https://modelcontextprotocol.io)
+server for Pakistan Hijri dates and calculated prayer times. It is a thin MCP
+surface over [`hijri-api`](https://github.com/pakistan-hijri/hijri-api), which is
+the source of truth for all calendar data.
 
-> Status: work in progress. The specification is stable; tool implementation is
-> being delivered milestone by milestone.
+`hijri-mcp` is **not** a moon-sighting authority, a congregation prayer-time
+service, an offline calculator, or a general Islamic calendar library. It does
+not ship a runtime dependency on `hijri-cli`. All dates and times are for
+`Asia/Karachi`, and the server communicates only over stdio.
 
-## What it will expose
+Version: `0.1.0`.
 
-- `list_cities` — supported cities, profiles, and coverage.
-- `get_hijri_date` — Gregorian-to-Hijri conversion for a city, with optional
-  Maghrib rollover.
-- `get_month_start` — first Gregorian day of a Hijri month.
-- `get_prayer_times` — daily prayer times for a city and Sunni/Shia profile.
+## Quick start
 
-The server is stdio-only. It never reads local timezone settings: all dates and
-prayer times are interpreted in `Asia/Karachi`.
+Node.js 20 or newer is required.
 
-## Requirements
+```bash
+npx -y hijri-mcp
+```
 
-- Node.js 20 or newer.
+The process speaks MCP on stdin/stdout. Logs go to stderr only.
 
-## Install and run
+## Host configuration
 
-Once published:
+### Claude Desktop
 
 ```json
 {
@@ -36,57 +37,146 @@ Once published:
 }
 ```
 
-For an already installed package:
+### Cursor
+
+Use `.cursor/mcp.json` or `~/.cursor/mcp.json`:
 
 ```json
 {
   "mcpServers": {
     "hijri": {
-      "command": "hijri-mcp"
+      "command": "npx",
+      "args": ["-y", "hijri-mcp"]
     }
   }
 }
 ```
 
-## Configuration
+### VS Code
+
+Use `.vscode/mcp.json`:
+
+```json
+{
+  "servers": {
+    "hijri": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "hijri-mcp"]
+    }
+  }
+}
+```
+
+Optional environment overrides can be added under `env`:
+
+```json
+{
+  "env": {
+    "HIJRI_API_BASE_URL": "https://pakistan-hijri.github.io/hijri-api"
+  }
+}
+```
+
+## Tools
+
+All tools return a structured envelope:
+
+```json
+{ "ok": true, "data": {} }
+```
+
+Errors return `{ "ok": false, "error": { "code", "message", "retryable", "details" } }`
+and set the MCP `isError` flag.
+
+### `list_cities`
+
+Lists supported cities, prayer-time profiles, and the upstream coverage window.
+It takes no input. City records intentionally omit coordinates and elevation.
+
+### `get_hijri_date`
+
+Resolves a Gregorian date to a published Hijri date.
+
+| Input | Type | Default | Notes |
+| --- | --- | --- | --- |
+| `date` | `YYYY-MM-DD` | today in Karachi | Explicit dates skip Maghrib rollover. |
+| `city` | string | `karachi` | One of `karachi`, `lahore`, `peshawar`, `quetta`. |
+| `profile` | string | `sunni_hanafi` | One of `sunni_hanafi`, `sunni_asr1`, `shia_jafari`. |
+| `after_maghrib` | boolean | `true` | Used only when `date` is omitted. |
+
+The result includes the civil date, effective Gregorian date, Hijri date and
+month name, confidence, announcement status, sources, uncertainty, estimated
+range, rollover status, timezone, and coverage window.
+
+### `get_month_start`
+
+Returns the Gregorian start date of a Hijri month.
+
+| Input | Type | Required |
+| --- | --- | --- |
+| `hijri_year` | integer | yes |
+| `hijri_month` | integer 1–12 | yes |
+
+Missing or unpublished months return `NOT_PUBLISHED`.
+
+### `get_prayer_times`
+
+Returns calculated prayer start times for one day.
+
+| Input | Type | Default |
+| --- | --- | --- |
+| `city` | string | required |
+| `profile` | string | `sunni_hanafi` |
+| `date` | `YYYY-MM-DD` | today in Karachi |
+
+No Maghrib rollover is applied. During Ramadan, the result also includes Sehri
+and Iftar offsets. Times are calculated starts, not congregation times.
+
+## Date, confidence, and announcement semantics
+
+- `confidence` is copied from `hijri-api`: `confirmed`, `estimated`, `predicted`,
+  or `unconfirmed`.
+- `announcement` is derived: `confirmed` on or before upstream
+  `confirmed_through`, otherwise `awaiting_announcement`.
+- **Dates after `confirmed_through` are awaiting announcement and must not be
+  presented as confirmed.**
+- When upstream supplies `uncertainty_days`, tools return an `estimate_range`
+  spanning that many days before and after the date. The server never invents an
+  uncertainty range.
+- Coverage failures return `OUT_OF_COVERAGE`; missing calendar or prayer records
+  return `NOT_PUBLISHED`.
+
+## Prayer-time disclaimer
+
+Prayer times are calculated by the upstream dataset, not announced by a local
+authority. Always defer to your local mosque or imambargah for congregation
+times. For religious obligations, follow your local moon-sighting authority.
+
+## Environment variables
 
 | Variable | Default | Purpose |
 | --- | --- | --- |
 | `HIJRI_API_BASE_URL` | `https://pakistan-hijri.github.io/hijri-api` | Override the upstream JSON base URL. |
 | `HIJRI_MCP_HTTP_TIMEOUT_MS` | `10000` | Per-request timeout in milliseconds. |
-| `HIJRI_MCP_LOG_LEVEL` | `warn` | One of `error`, `warn`, `info`, `debug`. Logs go to stderr only. |
+| `HIJRI_MCP_LOG_LEVEL` | `warn` | One of `error`, `warn`, `info`, `debug`. |
 
-## Confidence and announcement
-
-Every Hijri date carries upstream `confidence` and a derived `announcement`
-field:
-
-- `announcement: "confirmed"` means the date is on or before upstream
-  `confirmed_through`.
-- `announcement: "awaiting_announcement"` means the date is beyond
-  `confirmed_through`; treat it as provisional until a local authority
-  announces.
-
-When upstream supplies `uncertainty_days`, tools also return an
-`estimate_range` of possible Gregorian dates.
-
-## Disclaimer
-
-Prayer times are calculated, not announced by a local authority. Hijri dates
-after `confirmed_through` are estimates and are labelled accordingly. Always
-follow your local moon-sighting authority for religious obligations.
+Logs are JSON lines on stderr. Tool results never contain stack traces,
+environment values, or raw upstream bodies.
 
 ## Development
 
 ```bash
 npm install
 npm run lint
+npm run typecheck
 npm test
 npm run build
+npm run pack:check
 ```
 
-The full engineering rules live in `specs/agent-practices.md`. Architecture and
-tool contracts live in `specs/`.
+Engineering rules are in `specs/agent-practices.md`; architecture and tool
+contracts are in `specs/`. Reports are milestone-scoped under `reports/`.
 
 ## License
 
