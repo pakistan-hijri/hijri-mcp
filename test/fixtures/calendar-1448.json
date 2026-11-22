@@ -30,6 +30,24 @@
       "month_name": { "en": "Jumada al-Awwal", "ur": "جمادی الاول" },
       "confidence": "estimated",
       "uncertainty_days": 1
+    },
+    "2026-12-11": {
+      "hijri": "1448-06-01",
+      "year": 1448,
+      "month": 6,
+      "day": 1,
+      "month_name": { "en": "Rajab", "ur": "رجب" },
+      "confidence": "predicted",
+      "uncertainty_days": 2
+    },
+    "2026-12-20": {
+      "hijri": "1448-09-01",
+      "year": 1448,
+      "month": 9,
+      "day": 1,
+      "month_name": { "en": "Ramadan", "ur": "رمضان" },
+      "confidence": "predicted",
+      "uncertainty_days": 2
     }
   }
 }
