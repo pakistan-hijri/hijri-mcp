@@ -32,6 +32,7 @@ describe("MCP protocol", () => {
       ...cleanEnv(),
       HIJRI_API_BASE_URL: fixtureServer.baseUrl,
       HIJRI_MCP_LOG_LEVEL: "error",
+      HIJRI_MCP_TEST_CANARY: "canary-9f3a7c21",
     };
     const transport = new StdioClientTransport({
       command: process.execPath,
@@ -132,6 +133,73 @@ describe("MCP protocol", () => {
       ok: false,
       error: { code: "INVALID_INPUT", retryable: false },
     });
+  });
+
+  it("returns structured errors from list_cities and get_prayer_times", async () => {
+    const cities = await client.callTool({
+      name: "list_cities",
+      arguments: { unexpected: true },
+    });
+    expect(cities.isError).toBe(true);
+    expect(cities.structuredContent).toMatchObject({
+      ok: false,
+      error: { code: "INVALID_INPUT", retryable: false },
+    });
+
+    const prayer = await client.callTool({
+      name: "get_prayer_times",
+      arguments: { city: "islamabad" },
+    });
+    expect(prayer.isError).toBe(true);
+    expect(prayer.structuredContent).toMatchObject({
+      ok: false,
+      error: { code: "UNKNOWN_CITY", retryable: false },
+    });
+  });
+
+  it("does not leak environment values, stacks, or raw payloads", async () => {
+    const result = await client.callTool({
+      name: "get_prayer_times",
+      arguments: { city: "islamabad" },
+    });
+    const serialized = JSON.stringify(result);
+    expect(serialized).not.toContain("canary-9f3a7c21");
+    expect(serialized).not.toContain("city_name");
+    expect(serialized).not.toContain("generated_at");
+    expect(serialized).not.toMatch(/at\s+\S+:\d+:\d+/);
+  });
+
+  it("exits cleanly on SIGTERM", async () => {
+    const child = spawn(process.execPath, [serverPath], {
+      env,
+      stdio: ["pipe", "pipe", "pipe"],
+    });
+    let stdout = "";
+    child.stdout.setEncoding("utf8");
+    child.stdout.on("data", (chunk: string) => {
+      stdout += chunk;
+    });
+
+    try {
+      child.stdin.write(
+        `${JSON.stringify({
+          jsonrpc: "2.0",
+          id: 99,
+          method: "initialize",
+          params: {
+            protocolVersion: LATEST_PROTOCOL_VERSION,
+            capabilities: {},
+            clientInfo: { name: "shutdown-test", version: "1.0.0" },
+          },
+        })}\n`,
+      );
+      await waitFor(() => stdout.includes('"id":99'), 5000);
+      child.kill("SIGTERM");
+      const code = await new Promise<number | null>((resolve) => child.once("close", resolve));
+      expect(code).toBe(0);
+    } finally {
+      if (!child.killed) child.kill();
+    }
   });
 
   it("writes only JSON-RPC frames to stdout", async () => {
