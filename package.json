@@ -1,0 +1,58 @@
+{
+  "name": "hijri-mcp",
+  "version": "0.1.0",
+  "description": "MCP server for Pakistan Hijri dates and calculated prayer times",
+  "type": "module",
+  "license": "MIT",
+  "bin": {
+    "hijri-mcp": "dist/index.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "lint": "eslint . && tsc --noEmit",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "format": "prettier --write .",
+    "pack:check": "npm pack --dry-run",
+    "prepublishOnly": "npm run lint && npm test && npm run build"
+  },
+  "keywords": [
+    "mcp",
+    "hijri",
+    "islamic-calendar",
+    "prayer-times",
+    "pakistan"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pakistan-hijri/hijri-mcp.git"
+  },
+  "bugs": {
+    "url": "https://github.com/pakistan-hijri/hijri-mcp/issues"
+  },
+  "homepage": "https://github.com/pakistan-hijri/hijri-mcp#readme",
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/server": "2.4.0",
+    "zod": "^4.2.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@modelcontextprotocol/client": "2.4.0",
+    "@types/node": "^26.6.6",
+    "eslint": "^10.15.0",
+    "prettier": "^3.10.1",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.73.0",
+    "vitest": "^5.1.1"
+  }
+}
