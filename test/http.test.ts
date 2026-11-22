@@ -44,6 +44,31 @@ describe("createHttpClient", () => {
     await expect(http.getJson(url)).rejects.toMatchObject({ code: "INVALID_DATA" });
   });
 
+  it("maps connection failures to NETWORK", async () => {
+    const fetchImpl = vi.fn().mockRejectedValue(new Error("connect ECONNREFUSED"));
+    const http = createHttpClient({ timeoutMs: 1000, fetchImpl });
+    await expect(http.getJson(url)).rejects.toMatchObject({
+      code: "NETWORK",
+      retryable: true,
+      message: "Network error reaching api.test for /cities.json.",
+    });
+  });
+
+  it("rejects oversized response bodies", async () => {
+    const response = new Response("x".repeat(20), {
+      headers: { "content-length": "20" },
+    });
+    const http = createHttpClient({
+      timeoutMs: 1000,
+      maxResponseBytes: 10,
+      fetchImpl: vi.fn().mockResolvedValue(response),
+    });
+    await expect(http.getJson(url)).rejects.toMatchObject({
+      code: "INVALID_DATA",
+      message: "Response for /cities.json is too large.",
+    });
+  });
+
   it("maps timeouts to NETWORK", async () => {
     const fetchImpl = (_input: unknown, init?: RequestInit) =>
       new Promise<Response>((_resolve, reject) => {

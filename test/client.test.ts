@@ -56,6 +56,22 @@ describe("createHijriApi", () => {
     await expect(api.getCities()).rejects.toMatchObject({ code: "INVALID_DATA" });
   });
 
+  it("does not cache invalid payloads", async () => {
+    let call = 0;
+    const getJson = vi.fn(async () =>
+      call++ === 0 ? fixture("bad-cities.json") : fixture("cities.json"),
+    );
+    const api = createHijriApi({
+      baseUrl: "https://api.test/",
+      http: { getJson } as HttpClient,
+      cache: createCache(),
+    });
+
+    await expect(api.getCities()).rejects.toMatchObject({ code: "INVALID_DATA" });
+    await expect(api.getCities()).resolves.toHaveLength(2);
+    expect(getJson).toHaveBeenCalledTimes(2);
+  });
+
   it("caches validated payloads by absolute URL", async () => {
     const { api, getJson } = clientWith(() => fixture("cities.json"));
     await api.getCities();
