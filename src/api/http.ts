@@ -34,7 +34,7 @@ export function createHttpClient(options: HttpClientOptions): HttpClient {
         if (!response.ok) {
           throw new AppError(
             "NETWORK",
-            `Could not fetch ${route} (HTTP ${response.status}).`,
+            `Could not reach ${hostOf(url)} for ${route} (HTTP ${response.status}).`,
             { retryable: true },
           );
         }
@@ -60,8 +60,8 @@ export function createHttpClient(options: HttpClientOptions): HttpClient {
       } catch (error) {
         if (error instanceof AppError) throw error;
         const message = controller.signal.aborted
-          ? `Timed out fetching ${route}.`
-          : `Network error fetching ${route}.`;
+          ? `Timed out reaching ${hostOf(url)} for ${route}.`
+          : `Network error reaching ${hostOf(url)} for ${route}.`;
         throw new AppError("NETWORK", message, { retryable: true, cause: error });
       } finally {
         clearTimeout(timer);
@@ -75,5 +75,13 @@ function routeOf(url: string): string {
     return new URL(url).pathname;
   } catch {
     return url;
+  }
+}
+
+function hostOf(url: string): string {
+  try {
+    return new URL(url).host;
+  } catch {
+    return "the API host";
   }
 }

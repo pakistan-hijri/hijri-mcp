@@ -26,9 +26,11 @@ export async function resolveEffectiveDate(
   const prayer = await input.api.getPrayer(input.city, input.profile, gregorianYearOf(civil));
   const day = prayer.days[civil];
   if (!day) {
-    throw new AppError("PRAYER_DATA_UNAVAILABLE", `Prayer data is missing for ${civil}.`, {
-      details: { city: input.city, date: civil, profile: input.profile },
-    });
+    throw new AppError(
+      "PRAYER_DATA_UNAVAILABLE",
+      `Maghrib is unavailable for ${input.city} on ${civil}; use after_maghrib: false for a civil-date lookup.`,
+      { details: { city: input.city, date: civil, profile: input.profile } },
+    );
   }
 
   const maghrib = parseInstant(day.times.maghrib);

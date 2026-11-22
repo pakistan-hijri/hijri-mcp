@@ -89,7 +89,7 @@ export async function getPrayerTimes(
   if (!day) {
     throw new AppError(
       "NOT_PUBLISHED",
-      `Prayer data for ${input.city}/${input.profile}/${date} is not published.`,
+      `Prayer data for ${input.city}/${input.profile}/${gregorianYearOf(date)} is not published.`,
       { details: { city: input.city, date, profile: input.profile, year: prayer.year } },
     );
   }

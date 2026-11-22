@@ -36,9 +36,11 @@ export async function findHijriDay(api: HijriApi, date: string): Promise<HijriDa
   const index = await api.getIndex();
 
   if (index.coverage_start !== null && effectiveDate < index.coverage_start) {
-    throw new AppError("OUT_OF_COVERAGE", `Date ${effectiveDate} predates the published calendar.`, {
-      details: { coverageStart: index.coverage_start, date: effectiveDate },
-    });
+    throw new AppError(
+      "OUT_OF_COVERAGE",
+      `No calendar data covers ${effectiveDate}. Coverage starts ${index.coverage_start}.`,
+      { details: { coverageStart: index.coverage_start, date: effectiveDate } },
+    );
   }
 
   const estimate = estimateHijriYear(effectiveDate);
@@ -52,9 +54,11 @@ export async function findHijriDay(api: HijriApi, date: string): Promise<HijriDa
     if (entry) return { date: effectiveDate, entry, index };
   }
 
-  throw new AppError("OUT_OF_COVERAGE", `Date ${effectiveDate} is not in the published calendar.`, {
-    details: { date: effectiveDate, hijriYears: index.hijri_years },
-  });
+  throw new AppError(
+    "OUT_OF_COVERAGE",
+    `No calendar data covers ${effectiveDate}. Coverage starts ${index.coverage_start ?? "unknown"}.`,
+    { details: { date: effectiveDate, hijriYears: index.hijri_years } },
+  );
 }
 
 export async function findHijriMonthStart(
@@ -64,9 +68,11 @@ export async function findHijriMonthStart(
 ): Promise<HijriMonthStartLookup> {
   const index = await api.getIndex();
   if (!index.hijri_years.includes(hijriYear)) {
-    throw new AppError("NOT_PUBLISHED", `Hijri year ${hijriYear} is not published.`, {
-      details: { hijriYear, hijriYears: index.hijri_years },
-    });
+    throw new AppError(
+      "NOT_PUBLISHED",
+      `Hijri year ${hijriYear} is not published. Available years: ${index.hijri_years.join(", ")}.`,
+      { details: { hijriYear, hijriYears: index.hijri_years } },
+    );
   }
 
   const calendar = await api.getCalendar(hijriYear);
