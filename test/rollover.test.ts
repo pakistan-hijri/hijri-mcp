@@ -24,9 +24,20 @@ describe("resolveEffectiveDate", () => {
     expect(result).toEqual({ date: "2026-11-21", rolloverApplied: false });
   });
 
-  it("advances the civil date at or after Maghrib", async () => {
+  it("keeps the civil date just before Maghrib", async () => {
     const result = await resolveEffectiveDate({
-      now: new Date("2026-11-21T14:00:00Z"),
+      now: new Date("2026-11-21T12:44:59.000Z"),
+      api: apiWithPrayer(prayer),
+      city: "karachi",
+      profile: "sunni_hanafi",
+      afterMaghrib: true,
+    });
+    expect(result).toEqual({ date: "2026-11-21", rolloverApplied: false });
+  });
+
+  it("advances the civil date exactly at Maghrib", async () => {
+    const result = await resolveEffectiveDate({
+      now: new Date("2026-11-21T12:45:00.000Z"),
       api: apiWithPrayer(prayer),
       city: "karachi",
       profile: "sunni_hanafi",
@@ -57,6 +68,10 @@ describe("resolveEffectiveDate", () => {
         profile: "sunni_hanafi",
         afterMaghrib: true,
       }),
-    ).rejects.toMatchObject({ code: "PRAYER_DATA_UNAVAILABLE" });
+    ).rejects.toMatchObject({
+      code: "PRAYER_DATA_UNAVAILABLE",
+      message:
+        "Maghrib is unavailable for karachi on 2026-06-19; use after_maghrib: false for a civil-date lookup.",
+    });
   });
 });

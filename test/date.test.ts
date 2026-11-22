@@ -4,8 +4,12 @@ import { addDays, gregorianYearOf, parseCivilDate, todayInKarachi } from "../src
 describe("civil date helpers", () => {
   it("parses valid dates and rejects invalid calendar days", () => {
     expect(parseCivilDate("2026-02-28")).toBe("2026-02-28");
-    expect(() => parseCivilDate("2026-02-30")).toThrow();
-    expect(() => parseCivilDate("26-02-28")).toThrow();
+    expect(() => parseCivilDate("2026-02-30")).toThrowError(
+      expect.objectContaining({ code: "INVALID_INPUT" }),
+    );
+    expect(() => parseCivilDate("26-02-28")).toThrowError(
+      expect.objectContaining({ code: "INVALID_INPUT" }),
+    );
   });
 
   it("adds and subtracts days across month boundaries", () => {

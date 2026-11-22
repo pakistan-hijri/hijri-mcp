@@ -49,6 +49,45 @@ describe("getHijriDate", () => {
     expect(result.query.date).toBeNull();
   });
 
+  it("marks the confirmed_through boundary as confirmed", async () => {
+    const result = await getHijriDate(
+      {
+        date: "2026-12-10",
+        city: "karachi",
+        profile: "sunni_hanafi",
+        after_maghrib: true,
+      },
+      deps(),
+    );
+    expect(result.announcement).toBe("confirmed");
+    expect(result.estimate_range).toBeNull();
+  });
+
+  it("resolves explicit dates across the Gregorian year boundary", async () => {
+    const before = await getHijriDate(
+      {
+        date: "2026-12-31",
+        city: "karachi",
+        profile: "sunni_hanafi",
+        after_maghrib: true,
+      },
+      deps(),
+    );
+    const after = await getHijriDate(
+      {
+        date: "2027-01-01",
+        city: "karachi",
+        profile: "sunni_hanafi",
+        after_maghrib: true,
+      },
+      deps(),
+    );
+    expect(before.hijri.date).toBe("1448-09-12");
+    expect(after.hijri.date).toBe("1448-09-13");
+    expect(before.announcement).toBe("awaiting_announcement");
+    expect(after.announcement).toBe("awaiting_announcement");
+  });
+
   it("reports awaiting dates with an uncertainty range", async () => {
     const result = await getHijriDate(
       {
@@ -65,6 +104,20 @@ describe("getHijriDate", () => {
       earliest: "2026-12-09",
       latest: "2026-12-13",
     });
+  });
+
+  it("rejects impossible dates", async () => {
+    await expect(
+      getHijriDate(
+        {
+          date: "2026-02-30",
+          city: "karachi",
+          profile: "sunni_hanafi",
+          after_maghrib: true,
+        },
+        deps(),
+      ),
+    ).rejects.toMatchObject({ code: "INVALID_INPUT" });
   });
 
   it("rejects dates before coverage", async () => {

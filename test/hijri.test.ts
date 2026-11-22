@@ -19,10 +19,17 @@ describe("Hijri calendar helpers", () => {
     });
   });
 
-  it("rejects dates before coverage", async () => {
+  it("accepts the coverage_start boundary", async () => {
+    const { api } = createFixtureApi();
+    const result = await findHijriDay(api, "2025-06-27");
+    expect(result.entry.hijri).toBe("1447-01-01");
+  });
+
+  it("rejects dates before coverage with an actionable message", async () => {
     const { api } = createFixtureApi();
     await expect(findHijriDay(api, "2025-06-26")).rejects.toMatchObject({
       code: "OUT_OF_COVERAGE",
+      message: "No calendar data covers 2025-06-26. Coverage starts 2025-06-27.",
     });
   });
 
@@ -31,6 +38,21 @@ describe("Hijri calendar helpers", () => {
     await expect(findHijriDay(api, "2026-06-20")).rejects.toMatchObject({
       code: "OUT_OF_COVERAGE",
     });
+  });
+
+  it("rejects unpublished Gregorian years", async () => {
+    const { api } = createFixtureApi();
+    await expect(findHijriDay(api, "2028-01-01")).rejects.toMatchObject({
+      code: "OUT_OF_COVERAGE",
+    });
+  });
+
+  it("finds days across the Gregorian year boundary", async () => {
+    const { api } = createFixtureApi();
+    const before = await findHijriDay(api, "2026-12-31");
+    const after = await findHijriDay(api, "2027-01-01");
+    expect(before.entry.hijri).toBe("1448-09-12");
+    expect(after.entry.hijri).toBe("1448-09-13");
   });
 
   it("finds a Hijri month start", async () => {

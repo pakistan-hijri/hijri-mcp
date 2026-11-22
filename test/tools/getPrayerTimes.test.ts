@@ -25,6 +25,16 @@ describe("getPrayerTimes", () => {
     expect(result.times.maghrib).toBe("2026-06-17T19:20:00+05:00");
   });
 
+  it("loads the next Gregorian year without applying rollover", async () => {
+    const result = await getPrayerTimes(
+      { city: "karachi", profile: "sunni_hanafi", date: "2027-01-01" },
+      deps,
+    );
+    expect(result.date).toBe("2027-01-01");
+    expect(result.hijri.date).toBe("1448-09-13");
+    expect(result.ramadan).not.toBeNull();
+  });
+
   it("adds Ramadan Sehri and Iftar", async () => {
     const result = await getPrayerTimes(
       { city: "karachi", profile: "sunni_hanafi", date: "2026-12-20" },
