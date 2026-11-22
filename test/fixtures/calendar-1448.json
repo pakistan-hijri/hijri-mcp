@@ -1,0 +1,35 @@
+{
+  "hijri_year": 1448,
+  "coverage_start": "2025-06-27",
+  "generated_at": "2026-11-21T09:22:41.389Z",
+  "baseline": "islamic-umalqura (Intl)",
+  "days": {
+    "2026-06-17": {
+      "hijri": "1448-01-01",
+      "year": 1448,
+      "month": 1,
+      "day": 1,
+      "month_name": { "en": "Muharram", "ur": "محرم" },
+      "confidence": "confirmed",
+      "sources": ["https://example.test/muharram"]
+    },
+    "2026-06-18": {
+      "hijri": "1448-01-02",
+      "year": 1448,
+      "month": 1,
+      "day": 2,
+      "month_name": { "en": "Muharram", "ur": "محرم" },
+      "confidence": "confirmed",
+      "sources": ["https://example.test/muharram"]
+    },
+    "2026-11-21": {
+      "hijri": "1448-05-10",
+      "year": 1448,
+      "month": 5,
+      "day": 10,
+      "month_name": { "en": "Jumada al-Awwal", "ur": "جمادی الاول" },
+      "confidence": "estimated",
+      "uncertainty_days": 1
+    }
+  }
+}

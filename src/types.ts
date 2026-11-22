@@ -35,8 +35,8 @@ export interface HijriDayEntry {
   day: number;
   month_name: MonthName;
   confidence: Confidence;
-  sources?: string[];
-  uncertainty_days?: number;
+  sources?: string[] | undefined;
+  uncertainty_days?: number | undefined;
 }
 
 export interface CalendarFile {

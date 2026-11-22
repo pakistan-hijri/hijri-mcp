@@ -1,0 +1,37 @@
+{
+  "city": "karachi",
+  "city_name": "Karachi",
+  "province": "Sindh",
+  "profile": "sunni_hanafi",
+  "profile_label": "Sunni (Hanafi)",
+  "year": 2026,
+  "timezone": "Asia/Karachi",
+  "generated_at": "2026-11-21T09:22:41.389Z",
+  "disclaimer": "Calculated prayer times, not observed. For guidance only; always defer to your local mosque or imambargah.",
+  "sehri_offset_min": 10,
+  "iftar_offset_min": 5,
+  "days": {
+    "2026-06-17": {
+      "date": "2026-06-17",
+      "times": {
+        "fajr": "2026-06-17T04:15:00+05:00",
+        "sunrise": "2026-06-17T05:45:00+05:00",
+        "dhuhr": "2026-06-17T12:30:00+05:00",
+        "asr": "2026-06-17T16:15:00+05:00",
+        "maghrib": "2026-06-17T19:20:00+05:00",
+        "isha": "2026-06-17T20:35:00+05:00"
+      }
+    },
+    "2026-11-21": {
+      "date": "2026-11-21",
+      "times": {
+        "fajr": "2026-11-21T05:30:00+05:00",
+        "sunrise": "2026-11-21T07:00:00+05:00",
+        "dhuhr": "2026-11-21T12:15:00+05:00",
+        "asr": "2026-11-21T15:45:00+05:00",
+        "maghrib": "2026-11-21T17:45:00+05:00",
+        "isha": "2026-11-21T19:05:00+05:00"
+      }
+    }
+  }
+}
