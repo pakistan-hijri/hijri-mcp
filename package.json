@@ -15,6 +15,7 @@
   },
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
+    "postbuild": "node -e \"require('node:fs').chmodSync('dist/index.js', 0o755)\"",
     "lint": "eslint . && tsc --noEmit",
     "typecheck": "tsc --noEmit",
     "pretest": "npm run build",
